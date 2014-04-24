@@ -21,13 +21,25 @@ namespace PersistentCollections {
 			return (int)(bitmask >> (group * 5)) & 0x1F;
 		}
 
+		// Alias to make it clear how HAMT uses a single group of 5 bits in the
+		// hash value to determine which node to get/place the value at
 		public static int NextGroup(int bitmask) {
 			// Bit shift operators pad with 1's instead of 0's for signed values
 			// so we must do the shift operation on uints
-			return NextGroup((uint)bitmask);
+			return DivideBy32((uint)bitmask);
 		}
 
 		public static int NextGroup(uint bitmask) {
+			return DivideBy32(bitmask);
+		}
+
+		public static int DivideBy32(int bitmask) {
+			// Bit shift operators pad with 1's instead of 0's for signed values
+			// so we must do the shift operation on uints
+			return DivideBy32((uint)bitmask);
+		}
+
+		public static int DivideBy32(uint bitmask) {
 			return (int)(bitmask >> 5);
 		}
 

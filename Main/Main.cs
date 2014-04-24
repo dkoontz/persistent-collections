@@ -9,8 +9,9 @@ namespace PersistentCollections {
 		public static void Main(string[] args) {
 			var list = PersistentList<int>.EMPTY;
 
-			for (var i = 0; i < 32 * 32 * 32 * 32; ++i) {
+			for (var i = 0; i < 32 * 32 * 32; ++i) {
 				list = list.With(i);
+				Console.WriteLine("i: " + i + " = "+ list[i]);
 			}
 
 			Console.WriteLine("count: " + list.Count);

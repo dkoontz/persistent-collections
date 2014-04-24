@@ -30,5 +30,20 @@ namespace Tests {
 				list.Count.ShouldEqual(i+1);
 			}
 		}
+
+		[Test]
+		public void Appending_to_a_PersistentList_should_not_modify_the_previous_list() {
+			var list = PersistentList<int>.EMPTY;
+			list = list.With(10);
+			list.Count.ShouldEqual(1);
+			list[0].ShouldEqual(10);
+
+			var list2 = list.With(20);
+			list.Count.ShouldEqual(1);
+			list[0].ShouldEqual(10);
+
+			list2.Count.ShouldEqual(2);
+			list2[1].ShouldEqual(20);
+		}
 	}
 }

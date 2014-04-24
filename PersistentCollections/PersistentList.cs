@@ -5,6 +5,8 @@ using System.Collections.Generic;
 namespace PersistentCollections {
 
 	abstract class ListNode<T> {
+		protected const int FIVE_LOWEST_BITS = 0x1F;
+
 		public readonly int Layer;
 		public readonly int Count;
 		public readonly bool HasCapacity;
@@ -57,7 +59,7 @@ namespace PersistentCollections {
 
 		public override T this[int index] {
 			get {
-				throw new NotImplementedException();
+				return _children[((uint)index) >> (Layer * 5)][index & FIVE_LOWEST_BITS];
 			}
 		}
 
@@ -79,14 +81,13 @@ namespace PersistentCollections {
 	}
 
 	class ListNodeLeaf<T> : ListNode<T> {
-		const int FIVE_LOWEST_BITS = 0x1F;
 
 		public override T this[int index] { 
-			get { return _values[index & FIVE_LOWEST_BITS]; } 
+			get { return _values[index]; }
 		}
 
 		public override ListNode<T> With(T value) {
-			throw new NotImplementedException();
+			throw new NotImplementedException("Cannot append to a leaf node, leaves should be created by parent nodes");
 		}
 
 		public override ListNode<T> AppendLeafNode(ListNode<T> child) {
@@ -142,6 +143,20 @@ namespace PersistentCollections {
 			}
 
 			return new PersistentList<T>(_root.AppendLeafNode(leaf));
+		}
+
+		public T this[int index] {
+			get { 
+				if (_root == null) {
+					return _tail[index];
+				}
+
+				if (index > _root.Count - 1) {
+					return _tail[index - _root.Count];
+				}
+
+				return _root[index];
+			}
 		}
 	}
 }
