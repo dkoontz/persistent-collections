@@ -1,17 +1,17 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Main/Main.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="PersistentCollections/PersistentList.cs">
     <Files>
-      <File FileName="Main/Main.cs" Line="17" Column="34" />
-      <File FileName="PersistentCollections/PersistentList.cs" Line="213" Column="19" />
-      <File FileName="Tests/PersistentListTests.cs" Line="9" Column="1" />
-      <File FileName="Tests/ListNodeTests.cs" Line="1" Column="1" />
-      <File FileName="PersistentCollections/Util.cs" Line="1" Column="1" />
+      <File FileName="PersistentCollections/PersistentList.cs" Line="159" Column="30" />
+      <File FileName="Main/Main.cs" Line="1" Column="1" />
+      <File FileName="Tests/PersistentListTests.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/Users/dkoontz/dev/PersistentCollections/Main/Main.cs" line="17" column="1" />
+      <Breakpoint file="/Users/dkoontz/dev/PersistentCollections/PersistentCollections/PersistentList.cs" line="158" column="1" />
+      <Breakpoint file="/Users/dkoontz/dev/PersistentCollections/PersistentCollections/PersistentList.cs" line="144" column="1" />
+      <Breakpoint file="/Users/dkoontz/dev/PersistentCollections/PersistentCollections/PersistentList.cs" line="148" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />

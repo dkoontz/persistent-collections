@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace PersistentCollections {
 
 	abstract class ListNode<T> {
+		public const int NODE_ELEMENTS = 32;
 		protected const int FIVE_LOWEST_BITS = 0x1F;
 
 		public readonly int Layer;
@@ -35,7 +36,7 @@ namespace PersistentCollections {
 		public override ListNode<T> AppendLeafNode(ListNode<T> leaf) {
 			if (HasCapacity) {
 				if (Layer == 1) {
-					return new ListNodeParent<T>(Layer, Count + 32, _children.Length + 1 < 32, Util.ExtendArrayAndAppend(_children, leaf));
+					return new ListNodeParent<T>(Layer, Count + NODE_ELEMENTS, _children.Length + 1 < NODE_ELEMENTS, Util.ExtendArrayAndAppend(_children, leaf));
 				}
 			
 				var lastChild = _children[_children.Length - 1];
@@ -44,14 +45,14 @@ namespace PersistentCollections {
 					_children.CopyTo(newChildren, 0);
 					var newChild = lastChild.AppendLeafNode(leaf);
 					newChildren[newChildren.Length - 1] = newChild;
-					return new ListNodeParent<T>(Layer, Count + 32, newChildren.Length < 32 || newChild.HasCapacity, newChildren);
+					return new ListNodeParent<T>(Layer, Count + NODE_ELEMENTS, newChildren.Length < NODE_ELEMENTS || newChild.HasCapacity, newChildren);
 				}
 				var child = new ListNodeParent<T>(Layer - 1, 0, true, null);
-				return new ListNodeParent<T>(Layer, Count + 32, true, Util.ExtendArrayAndAppend(_children, child.AppendLeafNode(leaf)));
+				return new ListNodeParent<T>(Layer, Count + NODE_ELEMENTS, true, Util.ExtendArrayAndAppend(_children, child.AppendLeafNode(leaf)));
 			}
 
 			var sibling = new ListNodeParent<T>(Layer, 0, true, null);
-			return new ListNodeParent<T>(Layer + 1, Count + 32, true, new [] { 
+			return new ListNodeParent<T>(Layer + 1, Count + NODE_ELEMENTS, true, new [] { 
 				this, 
 				sibling.AppendLeafNode(leaf)
 			});
@@ -96,7 +97,7 @@ namespace PersistentCollections {
 
 		readonly T[] _values;
 
-		public ListNodeLeaf(T[] values) : base(0, 32, false) {
+		public ListNodeLeaf(T[] values) : base(0, NODE_ELEMENTS, false) {
 			_values = values;
 		}
 	}
@@ -117,9 +118,69 @@ namespace PersistentCollections {
 		readonly ListNode<T> _root;
 		readonly T[] _tail = EMPTY_VALUES;
 
-		// public PersistentList(IEnumerable<T>) {
-		//
-		//}
+		public PersistentList(IEnumerable<T> values) {
+			var currentLayer = new Queue<ListNode<T>>();
+			var value = new T[ListNode<T>.NODE_ELEMENTS];
+			int index = 0;
+			T[] tail = null;
+
+			foreach (var v in values) {
+				value[index] = v;
+				if (index == ListNode<T>.NODE_ELEMENTS - 1) {
+					currentLayer.Enqueue(new ListNodeLeaf<T>(value));
+					value = new T[ListNode<T>.NODE_ELEMENTS];
+					index = 0;
+				}
+				else {
+					++index;
+				}
+			}
+
+			if (index > 0) {
+				tail = new T[index];
+				Array.Copy(value, tail, index);
+			}
+
+			// build up elements starting at layer 1 -> 2 -> 3 each time consuming 
+			// all of the previous layer in NODE_ELEMENT element chunks
+			var nextLayer = new Queue<ListNode<T>>();
+			var children = new ListNode<T>[ListNode<T>.NODE_ELEMENTS];
+			int layer = 1;
+			index = 0;
+
+			while (currentLayer.Count > 1) {
+				while (currentLayer.Count > 0) {
+					children[index] = currentLayer.Dequeue();
+					if (index == ListNode<T>.NODE_ELEMENTS - 1) {
+						nextLayer.Enqueue(new ListNodeParent<T>(layer, (int)Util.IntPow(32, layer + 1), false, children));
+						index = 0;
+						children = new ListNode<T>[ListNode<T>.NODE_ELEMENTS];
+					}
+					else {
+						++index;
+					}
+				}
+				if (index > 0) {
+					var partialChildren = new ListNode<T>[index];
+					var count = 0;
+					for (var i = 0; i < index; ++i) {
+						partialChildren[i] = children[i];
+						count += children[i].Count;
+					}
+					nextLayer.Enqueue(new ListNodeParent<T>(layer, count, true, partialChildren));
+					children = new ListNode<T>[ListNode<T>.NODE_ELEMENTS];
+					index = 0;
+				}
+
+				var temp = nextLayer;
+				nextLayer = currentLayer;
+				currentLayer = temp;
+				++layer;
+			}
+
+			_tail = tail;
+			_root = currentLayer.Dequeue();
+		}
 
 		internal PersistentList(ListNode<T> root) {
 			_root = root;
