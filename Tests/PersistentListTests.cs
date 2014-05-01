@@ -17,8 +17,8 @@ namespace Tests {
 			var list2 = list1.With(5);
 			var list3 = list2.With(5);
 
-			list1.ShouldNotEqual(list2);
-			list2.ShouldNotEqual(list3);
+			list1.Should(Be.Not.SameAs(list2));
+			list2.Should(Be.Not.SameAs(list3));
 		}
 
 		[Test]
@@ -44,6 +44,26 @@ namespace Tests {
 
 			list2.Count.ShouldEqual(2);
 			list2[1].ShouldEqual(20);
+		}
+
+		[Test]
+		public void Values_in_the_list_can_be_accessed_by_index() {
+			var list = PersistentList<int>.EMPTY;
+
+			for (var i = 0; i < 10000; ++i) {
+				list = list.With(i);
+				list[i].ShouldEqual(i);
+			}
+		}
+
+		[Test]
+		public void List_can_be_iterated_over_using_an_enumerator() {
+			var list = new PersistentList<int>(Enumerable.Range(0, 10000).ToArray());
+			var count = 0;
+			foreach (var value in list) {
+				++count;
+			}
+			count.ShouldEqual(10000);
 		}
 	}
 }
